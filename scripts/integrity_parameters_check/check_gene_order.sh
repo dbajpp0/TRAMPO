@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check the selected gene order
-if [[ $1 == 'ances' || $1 == 'vert' || $1 == 'panc' || $1 == 'albin' || $1 == 'hyal' ]]; then
+if [[ $1 == 'ances' || $1 == 'vert' || $1 == 'panc' || $1 == 'albin' || $1 == 'hyal' || $1 == 'meta' ]]; then
 	echo "The gene order selected is $1"
 else
 	echo "The gene order selected is $1."
