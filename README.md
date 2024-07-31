@@ -197,7 +197,7 @@ Lumbricus terrestris (Anellida): lte
 Caenorhabditis elegans (Nematoda): cel
 Metridium senile (Cnidaria): mse
 ```
-If any of the above mentioned model organism fit with user's purposes, check [below](#Advanced-analysis) on how to customize the pipeline with optional parameters.
+If any of the above mentioned model organism fit with user's purposes, check [below](#launch-trampo-choosing-a-default-model-organism) on how to customize the pipeline with optional parameters.
 
 #### Example
     $ trampo -p examples/Primates -c 2 -m hsa
@@ -230,7 +230,7 @@ The parameter `-t` or `--tables` takes the path to **text** files containing the
                       nd5_tmhmm.txt
                       nd6_tmhmm.txt
 
-It is **mandatory** to rename the files as the gene name (following the admitted names for genes as reported in the table available at the [Launch TRAMPO choosing a default model organism](##Launch-TRAMPO-choosing-a-default-model-organism) section).
+It is **mandatory** to rename the files as the gene name (following the admitted names for genes as reported in the table available at the [Launch TRAMPO choosing a default model organism](#launch-trampo-choosing-a-default-model-organism) section).
 
 Each file must appear as the following example:
 
@@ -261,7 +261,7 @@ $ cat atp6.txt
     lcl|NC_012920.1_prot_YP_003024026.1_1	TMHMM2.0	TMhelix	   293   315
     lcl|NC_012920.1_prot_YP_003024026.1_1	TMHMM2.0	outside	   316   318
 ```
-Altogether with the path to table files it is **mandatory** to pass the `-s` `--sequence` FASTA file containing the **aminoacid** sequences of the users' model organism. FASTA sequences must contain the gene name as header, following the table reported in [Launch TRAMPO choosing a default model organism](##Launch-TRAMPO-choosing-a-default-model-organism) as accepted names.
+Altogether with the path to table files it is **mandatory** to pass the `-s` `--sequence` FASTA file containing the **aminoacid** sequences of the users' model organism. FASTA sequences must contain the gene name as header, following the table reported in [Launch TRAMPO choosing a default model organism](#launch-trampo-choosing-a-default-model-organism) as accepted names.
 
     $ head Pan_panicus.fna
 
