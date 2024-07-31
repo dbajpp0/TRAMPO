@@ -145,6 +145,7 @@ For example:
  trampo -p examples/Primates -c 2 -m hsa 
  ```
 
+Graphic outputs are resumed in the `output` folder
 
 # Basic analyses (recommended)
 
