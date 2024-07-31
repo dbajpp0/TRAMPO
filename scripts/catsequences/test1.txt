@@ -1,0 +1,6 @@
+>species1|a
+123456789abcd
+>species2|b
+1234-6789abcd
+>species3|c
+1234-----a-b-
