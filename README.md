@@ -49,7 +49,7 @@ We recommend to update/upgrade your system before installing the pipeline:
 Just copy paste the following commands in your terminal
 ```
 # Download the program from GitHub
-$ git clone https://github.com/TRAMPO
+$ git clone https://github.com/dbajpp0/TRAMPO.git
 
 # Unzip the archive and move in the unzipped folder
 $ unzip TRAMPO.zip | cd TRAMPO
