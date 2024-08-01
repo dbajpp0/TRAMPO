@@ -51,8 +51,8 @@ Just copy paste the following commands in your terminal
 # Download the program from GitHub
 $ git clone https://github.com/dbajpp0/TRAMPO.git
 
-# Unzip the archive and move in the unzipped folder
-$ unzip TRAMPO.zip | cd TRAMPO
+# Move in the downloaded folder
+$ cd TRAMPO
 
 # Create the conda environment -- user does not need to install dependecies alone --
 $ conda env create -f TRAMPO.yml
@@ -61,15 +61,15 @@ $ conda env create -f TRAMPO.yml
 $ conda activate TRAMPO
 
 # Make it executable
-$ chmod +x TRAMPO
+$ chmod +x trampo
 
 # Copy the program in the environment PATH and make it executable
-$ cd .. && sudo cp -r TRAMPO /usr/local/bin/
+$ cd .. && sudo cp -r trampo /usr/local/bin/
 
 # Open with a text editor (i.e. nano or vim) file the .bashrc file...
 $ nano ~/.bashrc
 # ...and append the following string at the end of the file and save
-$ export PATH=$PATH:/usr/local/bin/TRAMPO
+$ export PATH=$PATH:/usr/local/bin/trampo
 ```
 
 # Getting started
