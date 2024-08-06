@@ -11,7 +11,10 @@ In brief, by taking in (i) input FASTA files of mitochondrial genes, (ii) the co
 
 	
 
-A manuscript describing the results that can be obtained with this pipeline can be downloaded from bioRxix [Integrating Secondary Structure Information Enhances Phylogenetic Signal in Mitochondrial Protein Coding Genes](https://www.biorxiv.org/content/10.1101/2024.08.01.606191v1)
+A manuscript describing the results that can be obtained with this pipeline can be downloaded from bioRxix: 
+[Integrating Secondary Structure Information Enhances Phylogenetic Signal in Mitochondrial Protein Coding Genes
+Claudio Cucini, Francesco Nardi, Joan Pons
+bioRxiv 2024.08.01.606191](https://www.biorxiv.org/content/10.1101/2024.08.01.606191v1) 
 
 
 	
