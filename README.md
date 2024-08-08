@@ -3,11 +3,7 @@
 
 TRAMPO (TRAnsMembrane Protein Order) is a fast and automized pipeline designed to study nucleotide composition in trans-membrane, matrix and inner matrix space regions from multiple mitochondrial protein coding gene (PCG) sequences of several species. TRAMPO goal is to obtain a NEXUS file containing region-partitions at three different levels (codon, strand, and trans-membrane regions) to employ in phylogenetic studies.
 
-In brief, by taking in (i) input FASTA files of mitochondrial genes, (ii) the correspondent genetic code and (iii) the closest model organism, the program:
 
-	
-
-	
 
 	
 
