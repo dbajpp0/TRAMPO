@@ -64,12 +64,12 @@ $ conda activate TRAMPO
 $ chmod +x trampo
 
 # Copy the program in the environment PATH and make it executable
-$ cd .. && sudo cp -r trampo /usr/local/bin/
+$ cd .. && sudo cp -r TRAMPO /usr/local/bin/
 
 # Open with a text editor (i.e. nano or vim) file the .bashrc file...
 $ nano ~/.bashrc
 # ...and append the following string at the end of the file and save
-$ export PATH=$PATH:/usr/local/bin/trampo
+$ export PATH=$PATH:/usr/local/bin/TRAMPO
 ```
 
 # Getting started
