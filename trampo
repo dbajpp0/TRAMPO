@@ -14,8 +14,9 @@ trampo_path_bin=$(which trampo | wc -l)
 if [ $trampo_path_bin -eq 1 ]; then
     trampo_path=$(dirname "$(which trampo)")
 else
-    trampo_path=$(locate -br '^trampo$' | sed 's|trampo||')
+    trampo_path=$(dirname "$(locate -br '^trampo$')")
 fi
+trampo_path=${trampo_path}"/"
 
 ### [BANNER LOGO] ####
 chmod +x ${trampo_path}scripts/banner.sh
