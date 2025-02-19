@@ -121,7 +121,6 @@ dependencies:
       - tenacity==8.0.1
       - termcolor==1.1.0
       - threadpoolctl==3.1.0
-      - tmhmm-py==1.2.1
       - tqdm==4.63.1
       - urllib3==2.2.1
       - zipp==3.18.1
