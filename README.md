@@ -60,8 +60,8 @@ $ conda env create -f TRAMPO.yml
 # "Step-in" the environment
 $ conda activate TRAMPO
 
-# Make it executable
-$ chmod +x trampo
+# Make it executable long with all the script files
+$ find . -type f -exec chmod +x {} \;
 
 # Copy the program in the environment PATH and make it executable
 $ cd .. && sudo cp -r TRAMPO /usr/local/bin/
