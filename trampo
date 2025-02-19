@@ -19,7 +19,6 @@ fi
 trampo_path=${trampo_path}"/"
 
 ### [BANNER LOGO] ####
-chmod +x ${trampo_path}scripts/banner.sh
 ${trampo_path}scripts/banner.sh
 
 ### [FLAG HELP] ####
@@ -152,7 +151,7 @@ if [ "$gene_order" != 1 ]; then
 	bash ${trampo_path}scripts/integrity_parameters_check/create_output_folders.sh $outdir 1
     # check also if the gene order file fit the standard
     bash ${trampo_path}scripts/integrity_parameters_check/check_gene_order.sh $gene_order
-    gene_order="templates/go/"$gene_order
+    gene_order=$trampo_path"templates/go/"$gene_order
 else
 	bash ${trampo_path}scripts/integrity_parameters_check/create_output_folders.sh $outdir 0
 fi
@@ -178,7 +177,7 @@ tables="$outdir/05_Tables"
 stat="$outdir/06_Stat"
 graphics="$outdir/07_Graphics"
 partitions="$outdir/08_Partition_files"
-protter_tables="templates/model_organism_tables"
+protter_tables=$trampo_path"templates/model_organism_tables"
 
 
 # warning for nematodes
@@ -259,7 +258,7 @@ for file in $corrected_files/*aa.fas;
         #aligment of AA file
         mafft --quiet --thread $threads $aa_file > $tmp/$(basename $aa_file)".aligned.fas" 
         # pick up organism orthologous sequence
-        seqkit grep -r -p "$filename" -o $tmp/$filename".template.fas" templates/sequences/"$model".fas
+        seqkit grep -r -p "$filename" -o $tmp/$filename".template.fas" $trampo_path"templates/sequences/"$model".fas"
         # alignment of the organism orthologous sequence
         mafft --quiet --thread $threads --add $tmp/$filename".template.fas" $tmp/$(basename $aa_file)".aligned.fas" > $alignment/$filename"_aa_aligned.fas"
         rm $tmp/$(basename $aa_file)".aligned.fas" 
