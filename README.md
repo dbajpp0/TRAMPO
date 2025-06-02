@@ -1,4 +1,4 @@
-![alt text]([https://github.com/dbajpp0/TRAMPO/blob/main/images/logo.png])
+![alt text]([https://github.com/dbajpp0/TRAMPO/blob/main/images/logo.png] "logo")
 
 
 # TRAMPO v.2024.1
