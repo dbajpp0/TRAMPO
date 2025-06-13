@@ -1,0 +1,427 @@
+#!/bin/bash
+
+# color
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# start time
+start_time=$(date +%s)
+
+# Get the path from where the script is launched
+trampo_path_bin=$(which trampo | wc -l)
+
+if [ $trampo_path_bin -eq 1 ]; then
+    trampo_path=$(dirname "$(which trampo)")
+else
+    trampo_path=$(locate -br '^trampo$' | sed 's|trampo||')
+fi
+
+trampo_path=${trampo_path}"/"
+
+### [BANNER LOGO] ####
+${trampo_path}/scripts/banner.sh
+
+### [FLAG HELP] ####
+# Function to display script usage
+function helpparser {
+    echo "Usage: $(basename "$0") [-p PATH-TO-FILES] [-c GENETIC-CODE] [-m MODEL] [OPTIONS]"
+    echo ""
+    echo "TRAMPO version 2024.8"
+    echo ""
+    echo "REQUIRED:"
+    echo "  -p, --path  PATH    Path to fasta files directory [required]"
+    echo "  -c, --code  INT     Genetic code [Integer] referred as in NCBI https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi (e.g., 5 invertebrates mitochondrial) [required]"
+    echo "  -m, --model STR     Nickname of the default model organism [required]"
+    echo "                         User table (if you pass -s and -t): user"
+    echo "                         Homo sapiens (Chordata): hsa"
+    echo "                         Patiria pectinifera (Echinodermata) ppe"
+    echo "                         Drosophila melanogaster (Pancrustacea+Chelicerata): dme"
+    echo "                         Albinaria caerulea (Mollusca): aca"
+    echo "                         Lumbricus terrestris (Anellida): lte"
+    echo "                         Caenorhabditis elegans (Nematoda): cel"
+    echo "                         Metridium senile (Cnidaria): mse"
+    echo ""
+    echo "OPTIONAL SETTINGS:"
+    echo "  -s, --sequence      FASTA   User's model organism genes file in FASTA format. Check the manual for instructions"
+    echo "  -t, --tables        PATH    Path to user's model organism table files in TMHMM format. Check the manual for instructions"
+    echo "  -o, --outdir        PATH    Output directory (default: 'outdir')"
+    echo "  -g, --gene_order    STR     Gene order model nickname to be employed during the analysis, according to the proposed model organisms (see -m parameter). Check the manual for further information."
+    echo "                                  All vertebrates: vert"
+    echo "                                  Arthropods: panc"
+    echo "                                  Lumbricus terrestris, Caenorhabditis elegans, Metridium senile: ances"
+    echo "                                  Albinaria caerulea: albin"
+    echo "                                  Metacangronyx: meta" 
+    echo "  -n, --threads       INT     Number of threads to employ in MAFFT (default: 1)"
+    echo ""
+    echo "MISCELLANEA:"
+    echo "  -h, --help		Display this help and exit"
+    echo "  -v, --version	Display version information and exit"
+
+
+    exit 1
+}
+
+function version {
+    echo ""
+    echo "TRAMPO version 2024.8"
+    exit 1
+}
+
+
+# Parse command-line options
+while getopts ":s:t:o:g:p:c:m:n:-:v" option; do
+    case "$option" in
+        s) sequence=$OPTARG ;;
+        t) tables=$OPTARG ;;
+        o) outdir=$OPTARG ;;
+        g) gene_order=$OPTARG ;;
+        p) path=$OPTARG ;;
+        c) code=$OPTARG ;;
+        m) model=$OPTARG ;;
+        n) threads=$OPTARG ;;
+        -)
+            case "${OPTARG}" in
+                sequence) sequence="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                tables) tables="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                outdir) outdir="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                gene_order) gene_order="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                path) path="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                code) code="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                model) model="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                threads) threads="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+                help) helpparser;;
+                version) version;;
+                *) helpparser;;
+            esac;;
+        v) version;;
+        *) helpparser ;;
+    esac
+done
+
+# Check for required options
+if [ -z "$path" ] || [ -z "$code" ] || [ -z "$model" ]; then
+    helpparser
+fi
+
+# Set default values
+outdir=${outdir:-"outdir"}
+threads=${threads:-1}
+gene_order=${gene_order:-1}
+
+
+### [INTEGRITY PARAMETER CHECK] ###
+echo -e "${GREEN}INPUT PARAMETERS CHECK $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+
+# Rename the files
+python3 ${trampo_path}scripts/integrity_parameters_check/rename_files.py $path
+
+# Check optional file
+if [ -n "$sequence" ]; then
+    if [ -n "$tables" ]; then
+    	echo "Evaluating optional files..."
+        # Check optional files
+        # check if it's FASTA otherwise reformat
+        if ! grep -q "^>" "$sequence"; then
+            echo "Warning: File $sequence is not in FASTA format. It will be converted to FASTA before proceed"
+            seqret -sequence "$sequence" -outseq "$sequence".reformat -osformat fasta > /dev/null 2>&1
+            rm $sequence
+            mv "$sequence".reformat $sequence
+        fi
+        #count total stop codons in file
+        stop_codon=$(grep -c 'X' $sequence)
+        #count number of sequences
+        num_seqs=$(grep -c "^>" "$sequence")
+        #count only final stop codons
+        final_stop_codon=$(grep -c 'X$' $sequence)
+        #check if there are multiple stop codons and are not in the end of the file
+        if [ "$stop_codon" -gt "$num_seqs" -o "$stop_codon" != "$final_stop_codon" ]; then            
+            echo -e "${RED}Error: Input file '${sequence}' contains multiple stop codons.${NC}" 
+            exit 1
+        else
+            # if there are only final stop codons, remove them
+            sed -i "s/X$//g" $sequence
+        fi
+        # check if optional files are correct
+        python3 ${trampo_path}scripts/integrity_parameters_check/check_optional_files.py $sequence $tables
+	fi
+fi
+
+## folder creations
+if [ "$gene_order" != 1 ]; then
+	bash ${trampo_path}scripts/integrity_parameters_check/create_output_folders.sh $outdir 1
+    # check also if the gene order file fit the standard
+    bash ${trampo_path}scripts/integrity_parameters_check/check_gene_order.sh $gene_order
+    gene_order="templates/go/"$gene_order
+else
+	bash ${trampo_path}scripts/integrity_parameters_check/create_output_folders.sh $outdir 0
+fi
+
+### [INTEGRITY INPUT FILES CHECK] ###
+echo -e "${GREEN}INPUT FILE CHECK $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+
+# put some useful variables
+tmp="$outdir/tmp"
+original_files="$outdir/01_Original_Files"
+corrected_files="$outdir/02_Corrected_Files"
+alignment="$outdir/Alignment"
+nexus="$outdir/03_Nexus"
+domains_nexus_per_gene="$outdir/04_Domains_Nexus_per_Gene"
+domains_nexus_per_gene_tm="$outdir/04_Domains_Nexus_per_Gene/TM"
+domains_nexus_per_gene_im="$outdir/04_Domains_Nexus_per_Gene/IM"
+domains_nexus_per_gene_ma="$outdir/04_Domains_Nexus_per_Gene/MA"
+domains_nexus_per_strand="$outdir/04_Domains_Nexus_per_Strand"
+domains_nexus_per_strand_tm="$outdir/04_Domains_Nexus_per_Strand/TM"
+domains_nexus_per_strand_im="$outdir/04_Domains_Nexus_per_Strand/IM"
+domains_nexus_per_strand_ma="$outdir/04_Domains_Nexus_per_Strand/MA"
+tables="$outdir/05_Tables"
+stat="$outdir/06_Stat"
+graphics="$outdir/07_Graphics"
+partitions="$outdir/08_Partition_files"
+protter_tables="templates/model_organism_tables"
+
+
+# warning for nematodes
+for file in "$path"/*; do
+    # Check if the file belongs to nematodes by running the Python script
+    nematode=$(python3 ${trampo_path}scripts/integrity_input_files_check/skip_atp8_nematodes.py "$model" "$(basename "$file")" 2>&1)
+    # Check the output for the warning
+    if [[ $nematode == *"Warning"* ]]; then
+        echo "Warning: the model organism you chose (i.e C. elegans) does not have the ATP8 gene, therefore the pipeline will skip it"
+    else
+        cp "$file" $tmp
+        cp "$file" $original_files
+    fi
+done
+
+
+# pure integrity input files check
+for file in $tmp/*;
+    do
+        #check if the file is in FASTA format, otherwise change it
+        if ! grep -q "^>" "$file"; then
+            echo "Warning: File $file is not in FASTA format. It will be converted to FASTA before proceed"
+            seqret -sequence "$file" -outseq "$file".reformat -osformat fasta > /dev/null 2>&1
+            rm $file
+            mv "$file".reformat $file
+        fi
+
+        #check if the headers contain special unwanted characters
+        sed -i '/^>/ s/[^>A-Za-z0-9_]/_/g' $file
+        
+        # rename duplicated IDs by adding a number
+        seqkit rename -n -o $tmp/$(basename $file)".renamed" --quiet $file 
+        rm $file
+        mv $tmp/$(basename $file)".renamed" $file
+
+        # check if the file is in DNA or AA, we only accept DNA
+        seqkit seq -t 'dna' -v $file > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}Error: Input file ${file} must be a DNA sequence!${NC}"
+            rm -rf $outdir
+            exit 1
+        fi
+
+        #check the length of sequences, if length is >  avg+(stdev*3) or < avg-(stdev*3) prints a warning
+        python3 ${trampo_path}scripts/integrity_input_files_check/check_length.py $file $(basename $file)
+
+        # check stop codons
+        stop_codon=$(seqkit translate -T "$code" "$file" | grep -c '*')
+        num_seqs=$(grep -c "^>" "$file")
+        if [ "$stop_codon" -gt "$num_seqs" ]; then            
+            echo -e "${RED}Error: Input file '${file}' contains multiple stop codons.${NC}" 
+            exit 1
+        else
+            filename=$(basename -- "$file")
+            filename="${filename%.*}"
+            # translate nt to aa with corresponding gene code and then trim to the stop codon to the end of the line (only *, not X)
+            seqkit translate -T "$code" -w 0 "$file" | sed 's/*.*$//' > $corrected_files/$filename"_aa.fas" 
+            cp "$file" $corrected_files/$filename"_nt.fas"
+            rm "$file"
+
+        fi
+done
+echo "Integrity input files check: OK"
+
+
+### [ALIGNMENT] ###
+echo -e "${GREEN}ALIGNMENT $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+
+for file in $corrected_files/*aa.fas;
+    do
+        filename=$(basename -- "$file")
+        filename="${filename%_aa.fas}"
+        # put aa file in the variable aa_file
+        aa_file=$corrected_files/$filename"_aa.fas"
+        # put nt file in the variable nt_file
+        nt_file=$corrected_files/$filename"_nt.fas"
+
+        #aligment of AA file
+        mafft --quiet --thread $threads $aa_file > $tmp/$(basename $aa_file)".aligned.fas" 
+        # pick up organism orthologous sequence
+        seqkit grep -r -p "$filename" -o $tmp/$filename".template.fas" templates/sequences/"$model".fas
+        # alignment of the organism orthologous sequence
+        mafft --quiet --thread $threads --add $tmp/$filename".template.fas" $tmp/$(basename $aa_file)".aligned.fas" > $alignment/$filename"_aa_aligned.fas"
+        rm $tmp/$(basename $aa_file)".aligned.fas" 
+        # #aligment of NT file to the previous AA alignment
+        python3 ${trampo_path}scripts/alignment/realign_nt_over_aa.py $alignment/$filename"_aa_aligned.fas" $nt_file $alignment/$filename"_nt_aligned.fas"
+        # remove the model organism from the alignment and save it to the alignment folder
+        # seqkit grep -r -v -p "$model" -o $alignment/$filename"_aa_aligned.fas" $tmp/$filename"_aa_aligned.fas.template" # i don't want to delete the model organism, it has to produce the partitions before!
+        # remove tmp alignment file containing model organism
+        # rm $tmp/$filename"_aa_aligned.fas.template"
+done
+# check if alignment steps went good
+non_aligned_files=$(ls -l $original_files/* | wc -l)
+non_aligned_files=$((non_aligned_files*2))
+aligned_files=$(ls -l $alignment/*.fas | wc -l)
+if [ "$aligned_files" -eq "$non_aligned_files" ]; then
+    echo "Sequences correctly aligned!"
+else
+    echo "Error: sequences not correctly aligned"
+    exit 1
+fi
+
+### [NEXUS AND PARTITIONS] ###
+echo -e "${GREEN}CONVERT TO NEXUS $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+# convert to NEXUS - unwrapped -
+for ALIGNMENT in $alignment/*.fas;
+    do
+        alname=$(basename -- "$ALIGNMENT")
+        alname="${alname%.fas}"
+        seqret -sequence $ALIGNMENT -outseq $nexus/$alname".nex" -osformat nexusnon > /dev/null 2>&1
+done
+
+# create partitions
+for ALIGNMENT in $alignment/*aa_aligned.fas;
+    do
+        python3 ${trampo_path}scripts/nexus_and_partitions/create_partitions.py $ALIGNMENT $protter_tables/$model".tsv" $model
+done
+
+mv $nexus/*aa_aligned.nex $nexus/"AA"
+mv $nexus/*nt_aligned.nex $nexus/"NT"
+rm -rf $alignment
+
+
+# split partitions (Joan scripts)
+python3 ${trampo_path}scripts/nexus_and_partitions/extract_old_charsets.py -p $nexus/"NT" > $tmp/"old_charsets"
+python3 ${trampo_path}scripts/nexus_and_partitions/extract_length_old_charsets.py -p $nexus/"NT" > $tmp/"length_old_charsets"
+python3 ${trampo_path}scripts/nexus_and_partitions/new_intervals_builder.py $tmp/"length_old_charsets" $tmp/"old_charsets" > $partitions/"39p_gen_dom.nex"
+python3 ${trampo_path}scripts/nexus_and_partitions/add_codonsets2charsets.py -a $partitions/"39p_gen_dom.nex" > $partitions/"117p_gen_dom_cod.nex"
+python3 ${trampo_path}scripts/nexus_and_partitions/process_domain_rc1.py -a $partitions/"117p_gen_dom_cod.nex" > $partitions/"3p_dom.nex"
+python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_regions_codons_rc1.py -a $partitions/"117p_gen_dom_cod.nex" > $partitions/"9p_dom_cod.nex"
+python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_genes_rc1.py -a $partitions/"39p_gen_dom.nex" > $partitions/"13p_gen.nex"
+
+# if gene order has been passed, then create the partitions depending on this features
+if [ "$gene_order" != 1 ]; then
+    python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_codon_strand.py $gene_order $partitions/"117p_gen_dom_cod.nex"  > $partitions/"18p_str_dom_cod.nex"
+    sed -i 's/\\\\/\\/g' $partitions/"18p_str_dom_cod.nex"
+    python3 ${trampo_path}scripts/nexus_and_partitions/process_codon_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"3p_cod.nex"
+    python3 ${trampo_path}scripts/nexus_and_partitions/process_codon_strand_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"6p_cod_str.nex"
+    python3 ${trampo_path}scripts/nexus_and_partitions/process_12part_MA-IMmerged_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"12p_MAyIM_merged.nex"
+    python3 ${trampo_path}scripts/nexus_and_partitions/process_6part_joan_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"6p_byME.nex"
+    python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_codon_strand.py  $gene_order $partitions/"39p_gen_dom.nex" >  $partitions/"6p_str_dom.nex" 
+fi
+
+# List of files to check
+files=("39p_gen_dom.nex" "3p_dom.nex" "9p_dom_cod.nex" "13p_gen.nex" "117p_gen_dom_cod.nex")
+for file in ${files[@]}; do
+    if [ ! -f "$partitions/$file" ]; then
+        echo "Error: there was an issue with the split partition step. Forward this message to the curator claudio.cucini2@unsi.it"
+        exit 1
+    fi
+done
+
+# cleaning tmp fles
+rm $tmp/*
+
+
+# convert temporary files to FASTA in order to concatenate them
+for NEXUS in $nexus/"NT"/*.nex;
+    do
+        filename=$(basename -- "$NEXUS")
+        filename="${filename%_nt.nex}"
+        seqret -sequence $NEXUS -outseq $tmp/$filename".fas"   > /dev/null 2>&1
+done
+
+
+# copy the catsequences script to the wd. It otherwise will write the output somewhere else
+cp -R ${trampo_path}scripts/catsequences $tmp
+# move in the wd
+cd $tmp
+# create a tmp list of files
+ls *.fas > LIST
+catsequences/catsequences LIST  > /dev/null 2>&1
+if [ ! -f "allseqs.fas" ]; then
+    echo "Error: there was an issue with the concatenation step. Forward this message to the curator claudio.cucini2@unsi.it"
+    exit 1
+fi
+# move back to the original wd
+cd - > /dev/null
+# remove the copied folder
+rm -rf $tmp/catsequences
+# bring the concatenated file to NEXUS format
+seqret -sequence $tmp/allseqs.fas -outseq $nexus/nt_combined.nex -osformat nexusnon > /dev/null 2>&1
+# cleaning
+rm $tmp/*
+# add the gene+region partitions to the concatenated file and save it as tmp file
+cp $nexus/nt_combined.nex $tmp/nt_combined_genes_regions.nex  
+cat $partitions/"39p_gen_dom.nex" | grep -v '#' >>  $tmp/nt_combined_genes_regions.nex
+# add the region partitions to the concatenated file and save it as tmp file
+cp $nexus/nt_combined.nex $tmp/nt_combined_regions.nex  
+cat $partitions/"3p_dom.nex" | grep -v '#' >>  $tmp/nt_combined_regions.nex
+
+
+# split each charset into a file
+python3 ${trampo_path}scripts/nexus_and_partitions/split_partitions.py $tmp/nt_combined_genes_regions.nex $tmp/nt_combined_genes_regions
+python3 ${trampo_path}scripts/nexus_and_partitions/split_partitions.py $tmp/nt_combined_regions.nex $tmp/nt_combined_regions
+
+if [ "$gene_order" != 1 ]; then
+    # add the strand+region partition to the concatenated file and save it a as a tmp file
+    cp $nexus/nt_combined.nex $tmp/nt_combined_strand_regions.nex  
+    cat $partitions/"6p_str_dom.nex"  | grep -v '#' >>  $tmp/nt_combined_strand_regions.nex
+    python3 ${trampo_path}scripts/nexus_and_partitions/split_partitions.py $tmp/nt_combined_strand_regions.nex $tmp/"nt_combined_strand_regions"
+fi
+
+## [AA freq and RSCU calculation]
+echo -e "${GREEN}AMINOACID FREQUENCY, RSCU AND SKEWS COMPUTING $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+python3 ${trampo_path}scripts/AAfreq_RSCU_Skews/AAfreq_RSCUcalc.py $tmp $tables/"RSCU.tsv" $tables/"AA_freq.tsv" $tables/"First_skew.tsv" $tables/"Second_Third_skew.tsv" $code ## da capire quali grafici fare
+N_tables=$(ls -l $tables | wc -l)
+if [ "$N_tables" -eq 0 ]; then
+    echo "Error: AMINOACID FREQUENCY, RSCU AND SKEWS calculation failed"
+    exit 1
+else
+    echo "AMINOACID FREQUENCY, RSCU and SKEWS calculation done"
+fi
+
+if [ "$gene_order" != 1 ]; then
+    mv $tmp/nt_combined_strand_regions*IM $domains_nexus_per_strand_im
+    mv $tmp/nt_combined_strand_regions*MA $domains_nexus_per_strand_ma
+    mv $tmp/nt_combined_strand_regions*TM $domains_nexus_per_strand_tm
+fi
+
+mv $tmp/nt_combined_genes_regions*IM $domains_nexus_per_gene_im
+mv $tmp/nt_combined_genes_regions*MA $domains_nexus_per_gene_ma
+mv $tmp/nt_combined_genes_regions*TM $domains_nexus_per_gene_tm
+rm $tmp/*
+
+
+## [GRAPHICS]
+echo -e "${GREEN}GRAPHICS CREATION AND STATISTICS $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+python3 ${trampo_path}scripts/graphics_and_stats/PCA_and_Scatter.py $tables/"Second_Third_skew.tsv"  $graphics $gene_order 
+python3 ${trampo_path}scripts/graphics_and_stats/GCfreq.py $tables/"First_skew.tsv"  $graphics $stat $gene_order
+python3 ${trampo_path}scripts/graphics_and_stats/Frequency.py $tables/"AA_freq.tsv" $graphics $stat $gene_order 
+python3 ${trampo_path}scripts/graphics_and_stats/RSCU_stats.py $tables/"RSCU.tsv" $stat $gene_order
+
+rm -rf $tmp
+end_time=$(date +%s)
+elapsed_time=$((end_time - start_time))
+minutes=$((elapsed_time / 60))
+seconds=$((elapsed_time % 60))
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}TRAMPO analysis finished in $minutes minute(s) and $seconds second(s)${NC}"
+else
+    echo -e "${RED}TRAMPO analysis failed${NC}"
+fi
+
+
+
