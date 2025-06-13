@@ -346,6 +346,7 @@ Example:
 ![alt text][workflow]
 
 [workflow]: https://github.com/dbajpp0/TRAMPO/blob/main/images/workflow.png "Workflow"
+**Workflow of TRAMPO pipeline**
 
 The primary goal of the pipeline is to release a NEXUS partition file, useful to run in phylogenetic softwares (e.g. IQTREE), splitted in charsets related to the membrane position of processed Protein Coding Genes.
 
@@ -429,6 +430,10 @@ _Note: at this step, all TSV statistical files are stored in the 7_Stat, whereas
 
 
 ### Outputs
+![alt text][outputs]
+
+[workflow]: https://github.com/dbajpp0/TRAMPO/blob/main/images/outputs.png "Outputs"
+**Main charset outputs of TRAMPO**
 
 Outputs will be saved in an out directory `outdir` (or the custom user's name passed via `-o` option). Inside the `outdir`, if any error occurred, you will find the following output folders:
 ```
@@ -484,13 +489,14 @@ Folder numbers follows the chronological order of TRAMPO commands. In this respe
 
 Moreover, directly in the `outdir` folder, NEXUS partition files are written:
 ```
-├── new_charsets_codons.nex
-├── new_charsets_codons_strand.nex
-├── new_charsets_genes.nex
-├── new_charsets_genes_regions.nex
-├── new_charsets_regions_codons.nex
-├── new_charsets_regions.nex
-└── new_charsets_strand_regions.nex
+├── 12p_MAyIM_merged.nex # partitioning by strand by domain (IM and MA are merged)
+├── 13p_gen.nex # partitioning by gene
+├── 18p_str_dom_cod.nex # partitioning by strand by domain by codon
+├── 3p_cod.nex # partitioning by codon
+├── 3p_dom.nex # partitioning by domain
+├── 6p_cod_str.nex # partitioning by codon by strand
+├── 6p_str_dom.nex # partitioning by strand by domain 
+└── 9p_dom_cod.nex # partitioning by domain by codon
 ```
 
 # What TRAMPO does not do?
