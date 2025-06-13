@@ -342,11 +342,11 @@ Example:
 
 
 # What TRAMPO does?
-
+**Workflow of TRAMPO pipeline**
 ![alt text][workflow]
 
 [workflow]: https://github.com/dbajpp0/TRAMPO/blob/main/images/workflow.png "Workflow"
-**Workflow of TRAMPO pipeline**
+
 
 The primary goal of the pipeline is to release a NEXUS partition file, useful to run in phylogenetic softwares (e.g. IQTREE), splitted in charsets related to the membrane position of processed Protein Coding Genes.
 
@@ -430,10 +430,11 @@ _Note: at this step, all TSV statistical files are stored in the 7_Stat, whereas
 
 
 ### Outputs
+**Main charset outputs of TRAMPO**
 ![alt text][outputs]
 
-[workflow]: https://github.com/dbajpp0/TRAMPO/blob/main/images/outputs.png "Outputs"
-**Main charset outputs of TRAMPO**
+[outputs]: https://github.com/dbajpp0/TRAMPO/blob/main/images/outputs.png "Outputs"
+
 
 Outputs will be saved in an out directory `outdir` (or the custom user's name passed via `-o` option). Inside the `outdir`, if any error occurred, you will find the following output folders:
 ```
