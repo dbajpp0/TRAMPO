@@ -343,6 +343,10 @@ Example:
 
 # What TRAMPO does?
 
+![alt text][workflow]
+
+[workflow]: https://github.com/dbajpp0/TRAMPO/blob/main/images/workflow.png "Workflow"
+
 The primary goal of the pipeline is to release a NEXUS partition file, useful to run in phylogenetic softwares (e.g. IQTREE), splitted in charsets related to the membrane position of processed Protein Coding Genes.
 
  * Firstly, it performs a quality check of both required and (if passed) optional input files. In detail:
