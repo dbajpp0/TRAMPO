@@ -305,8 +305,8 @@ rm -rf $alignment
 # split partitions (Joan scripts)
 python3 ${trampo_path}scripts/nexus_and_partitions/extract_old_charsets.py -p $nexus/"NT" > $tmp/"old_charsets"
 python3 ${trampo_path}scripts/nexus_and_partitions/extract_length_old_charsets.py -p $nexus/"NT" > $tmp/"length_old_charsets"
-python3 ${trampo_path}scripts/nexus_and_partitions/new_intervals_builder.py $tmp/"length_old_charsets" $tmp/"old_charsets" > $partitions/"39p_gen_dom.nex"
-python3 ${trampo_path}scripts/nexus_and_partitions/add_codonsets2charsets.py -a $partitions/"39p_gen_dom.nex" > $partitions/"117p_gen_dom_cod.nex"
+#python3 ${trampo_path}scripts/nexus_and_partitions/new_intervals_builder.py $tmp/"length_old_charsets" $tmp/"old_charsets" > $partitions/"39p_gen_dom.nex"
+#python3 ${trampo_path}scripts/nexus_and_partitions/add_codonsets2charsets.py -a $partitions/"39p_gen_dom.nex" > $partitions/"117p_gen_dom_cod.nex"
 python3 ${trampo_path}scripts/nexus_and_partitions/process_domain_rc1.py -a $partitions/"117p_gen_dom_cod.nex" > $partitions/"3p_dom.nex"
 python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_regions_codons_rc1.py -a $partitions/"117p_gen_dom_cod.nex" > $partitions/"9p_dom_cod.nex"
 python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_genes_rc1.py -a $partitions/"39p_gen_dom.nex" > $partitions/"13p_gen.nex"
@@ -318,7 +318,7 @@ if [ "$gene_order" != 1 ]; then
     python3 ${trampo_path}scripts/nexus_and_partitions/process_codon_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"3p_cod.nex"
     python3 ${trampo_path}scripts/nexus_and_partitions/process_codon_strand_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"6p_cod_str.nex"
     python3 ${trampo_path}scripts/nexus_and_partitions/process_12part_MA-IMmerged_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"12p_MAyIM_merged.nex"
-    python3 ${trampo_path}scripts/nexus_and_partitions/process_6part_joan_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"6p_byME.nex"
+    #python3 ${trampo_path}scripts/nexus_and_partitions/process_6part_joan_rc1.py $partitions/"18p_str_dom_cod.nex"  $partitions/"6p_byME.nex"
     python3 ${trampo_path}scripts/nexus_and_partitions/merge_new_charsets_codon_strand.py  $gene_order $partitions/"39p_gen_dom.nex" >  $partitions/"6p_str_dom.nex" 
 fi
 
