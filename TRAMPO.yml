@@ -1,9 +1,11 @@
 name: TRAMPO
 channels:
-  - bioconda
   - bjornfjohansson
-  - conda-forge
   - defaults
+  - bioconda
+  - conda-forge
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
 dependencies:
   - _libgcc_mutex=0.1=main
   - asttokens=2.4.0=pyhd8ed1ab_0
@@ -12,9 +14,9 @@ dependencies:
   - backports.functools_lru_cache=1.6.5=pyhd8ed1ab_0
   - biopython=1.78=py38h7f8727e_0
   - blas=1.0=mkl
-  - ca-certificates=2024.3.11=h06a4308_0
+  - ca-certificates=2025.4.26=hbd8a1cb_0
   - cai=1.0.3=py_0
-  - certifi=2024.2.2=py38h06a4308_0
+  - certifi=2024.8.30=pyhd8ed1ab_0
   - click=8.0.4=py38h06a4308_0
   - decorator=5.1.1=pyhd8ed1ab_0
   - emboss=6.5.7=ha92aebf_5
@@ -77,6 +79,7 @@ dependencies:
   - zeromq=4.3.4=h2531618_0
   - zlib=1.2.11=h7f8727e_4
   - pip:
+      - abifpy==0.9
       - appdirs==1.4.4
       - attrs==23.2.0
       - charset-normalizer==3.3.2
@@ -124,4 +127,4 @@ dependencies:
       - tqdm==4.63.1
       - urllib3==2.2.1
       - zipp==3.18.1
-prefix: /home/cc/anaconda3/envs/TRAMPO
+prefix: /home/cc/miniconda3/envs/TRAMPO
